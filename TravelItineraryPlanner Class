@@ -1,0 +1,110 @@
+import java.util.*;
+import java.io.*;
+import org.json.JSONObject;
+import java.net.HttpURLConnection;
+import java.net.URL;
+
+public class TravelItineraryPlanner {
+    private List<Destination> itinerary;
+    private final String weatherApiKey = "YOUR_OPENWEATHERMAP_API_KEY"; // Get your API key
+
+    public TravelItineraryPlanner() {
+        itinerary = new ArrayList<>();
+    }
+
+    public void addDestination(Destination destination) {
+        itinerary.add(destination);
+    }
+
+    public void printItinerary() {
+        double totalTripCost = 0;
+
+        for (Destination destination : itinerary) {
+            System.out.println("\nDestination: " + destination.getName());
+            System.out.println("Travel Dates: " + destination.getStartDate() + " to " + destination.getEndDate());
+            System.out.println("Weather: " + destination.getWeather());
+            System.out.println("Total Cost: $" + destination.getTotalCost());
+
+            totalTripCost += destination.getTotalCost();
+        }
+
+        System.out.println("\nTotal Trip Cost: $" + totalTripCost);
+    }
+
+    public void fetchWeatherForDestinations() {
+        for (Destination destination : itinerary) {
+            String weather = getWeatherForCity(destination.getName());
+            destination.setWeather(weather);
+        }
+    }
+
+    public String getWeatherForCity(String city) {
+        try {
+            String urlStr = "http://api.openweathermap.org/data/2.5/weather?q=" + city + "&appid=" + weatherApiKey + "&units=metric";
+            URL url = new URL(urlStr);
+            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+            conn.setRequestMethod("GET");
+
+            BufferedReader in = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+            String inputLine;
+            StringBuffer response = new StringBuffer();
+
+            while ((inputLine = in.readLine()) != null) {
+                response.append(inputLine);
+            }
+            in.close();
+
+            JSONObject myResponse = new JSONObject(response.toString());
+            return "Temp: " + myResponse.getJSONObject("main").getDouble("temp") + "°C, " +
+                   "Weather: " + myResponse.getJSONArray("weather").getJSONObject(0).getString("description");
+        } catch (Exception e) {
+            e.printStackTrace();
+            return "Weather data not available.";
+        }
+    }
+
+    public static void main(String[] args) {
+        Scanner scanner = new Scanner(System.in);
+        TravelItineraryPlanner planner = new TravelItineraryPlanner();
+
+        // Input destinations
+        while (true) {
+            System.out.print("Enter destination name (or 'done' to finish): ");
+            String name = scanner.nextLine();
+
+            if (name.equalsIgnoreCase("done")) {
+                break;
+            }
+
+            System.out.print("Enter travel start date (yyyy-mm-dd): ");
+            String startDateStr = scanner.nextLine();
+            Date startDate = Date.valueOf(startDateStr); // This requires Java 8+
+
+            System.out.print("Enter travel end date (yyyy-mm-dd): ");
+            String endDateStr = scanner.nextLine();
+            Date endDate = Date.valueOf(endDateStr);
+
+            System.out.print("Enter estimated travel cost: ");
+            double travelCost = scanner.nextDouble();
+
+            System.out.print("Enter estimated accommodation cost: ");
+            double accommodationCost = scanner.nextDouble();
+
+            System.out.print("Enter estimated food cost: ");
+            double foodCost = scanner.nextDouble();
+            scanner.nextLine();  // Consume the newline character
+
+            // Create and add the destination
+            Destination destination = new Destination(name, startDate, endDate, travelCost, accommodationCost, foodCost);
+            planner.addDestination(destination);
+        }
+
+        // Fetch weather information
+        planner.fetchWeatherForDestinations();
+
+        // Print itinerary summary
+        planner.printItinerary();
+
+        scanner.close();
+    }
+}
