@@ -1,0 +1,58 @@
+import java.util.Date;
+
+public class Destination {
+    private String name;
+    private Date startDate;
+    private Date endDate;
+    private String weather;
+    private double travelCost;
+    private double accommodationCost;
+    private double foodCost;
+
+    // Constructor
+    public Destination(String name, Date startDate, Date endDate, double travelCost, double accommodationCost, double foodCost) {
+        this.name = name;
+        this.startDate = startDate;
+        this.endDate = endDate;
+        this.travelCost = travelCost;
+        this.accommodationCost = accommodationCost;
+        this.foodCost = foodCost;
+    }
+
+    // Getters and setters
+    public String getName() {
+        return name;
+    }
+
+    public Date getStartDate() {
+        return startDate;
+    }
+
+    public Date getEndDate() {
+        return endDate;
+    }
+
+    public String getWeather() {
+        return weather;
+    }
+
+    public void setWeather(String weather) {
+        this.weather = weather;
+    }
+
+    public double getTravelCost() {
+        return travelCost;
+    }
+
+    public double getAccommodationCost() {
+        return accommodationCost;
+    }
+
+    public double getFoodCost() {
+        return foodCost;
+    }
+
+    public double getTotalCost() {
+        return travelCost + accommodationCost + foodCost;
+    }
+}
